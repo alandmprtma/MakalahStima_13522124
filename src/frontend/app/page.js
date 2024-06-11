@@ -50,6 +50,10 @@ const RiskProfileInfo = ({ profile }) => {
   }
 };
   
+  const formatPercentage = (value) => {
+    return (value * 100).toFixed(2) + '%';
+  };
+
   const handleAlgorithmClick = (algorithm) => {
     console.log("Algorithm", algorithm);
     setActiveAlgorithm(algorithm);
@@ -74,6 +78,25 @@ const RiskProfileInfo = ({ profile }) => {
       return;
     }
 
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('capacity', activeAlgorithm);
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/optimize', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      setResult(data);
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Error:", error);
+      setErrorMessage("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFileChange = (e) => {
@@ -95,7 +118,7 @@ const RiskProfileInfo = ({ profile }) => {
         type="file"
         accept=".csv"
         onChange={handleFileChange}
-        className="mb-4 translate-x-[120px] mt-3"
+        className="mb-4 translate-x-[120px] mt-3 text-black"
       />
       <CSVUploader file={file} />
       </div>
@@ -144,6 +167,16 @@ const RiskProfileInfo = ({ profile }) => {
           </div>
         </div>
       </form>
+      {loading && <p className='text-black'>Loading...</p>}
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+        {submitted && result && (
+        <div className="mt-4 p-4 border rounded bg-gray-100 text-black w-[600px]">
+          <h5 className="flex text-lg font-semibold justify-center">Hasil Optimasi</h5>
+          <p className='mt-3'>Rekomendasi Saham: {result.stock_recommendation}</p>
+          <p>Return Maksimal Harian: {formatPercentage(result.max_return)}</p> {/* Display return in percentage */}
+          <p>Risiko (Standar Deviasi): {formatPercentage(result.risk)}</p> {/* Display risk in percentage */}
+        </div>
+      )}
     </div>  
     </body>
     </html>
