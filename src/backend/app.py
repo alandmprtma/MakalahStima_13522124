@@ -65,9 +65,9 @@ def optimize():
         weight = risk
 
         if capacity == "Moderat":
-            capacity = 0.05
-        elif capacity == "Konservatif":
             capacity = 0.1
+        elif capacity == "Konservatif":
+            capacity = 0.05
         elif capacity == "Agresif":
             capacity = 0.2
 
